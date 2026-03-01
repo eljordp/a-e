@@ -18,7 +18,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         from: 'A&E Vineyard Leads <onboarding@resend.dev>',
-        to: process.env.LEAD_EMAIL || 'your-email@example.com',
+        to: process.env.LEAD_EMAIL || 'alex@caymus.com',
         subject: `New Quote Request: ${name} — ${service}`,
         html: `
           <h2 style="color:#1a1408;font-family:sans-serif;">New Vineyard Quote Request</h2>
