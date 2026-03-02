@@ -1,24 +1,26 @@
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+import { NextRequest, NextResponse } from "next/server";
 
-  const { name, phone, email, location, service, acreage, details } = req.body;
+export async function POST(request: NextRequest) {
+  const { name, phone, email, location, service, acreage, details } =
+    await request.json();
 
   if (!name || !phone || !location || !service) {
-    return res.status(400).json({ error: 'Missing required fields' });
+    return NextResponse.json(
+      { error: "Missing required fields" },
+      { status: 400 }
+    );
   }
 
   try {
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: 'A&E Vineyard Leads <onboarding@resend.dev>',
-        to: process.env.LEAD_EMAIL || 'alex@caymus.com',
+        from: "A&E Vineyard Leads <onboarding@resend.dev>",
+        to: process.env.LEAD_EMAIL || "alex@caymus.com",
         subject: `New Quote Request: ${name} — ${service}`,
         html: `
           <h2 style="color:#1a1408;font-family:sans-serif;">New Vineyard Quote Request</h2>
@@ -33,7 +35,7 @@ export default async function handler(req, res) {
             </tr>
             <tr style="border-bottom:1px solid #e8e0d0;">
               <td style="padding:14px;font-weight:bold;color:#666;">Email</td>
-              <td style="padding:14px;">${email || 'Not provided'}</td>
+              <td style="padding:14px;">${email || "Not provided"}</td>
             </tr>
             <tr style="border-bottom:1px solid #e8e0d0;">
               <td style="padding:14px;font-weight:bold;color:#666;">Location</td>
@@ -45,11 +47,11 @@ export default async function handler(req, res) {
             </tr>
             <tr style="border-bottom:1px solid #e8e0d0;">
               <td style="padding:14px;font-weight:bold;color:#666;">Acreage</td>
-              <td style="padding:14px;">${acreage || 'Not provided'}</td>
+              <td style="padding:14px;">${acreage || "Not provided"}</td>
             </tr>
             <tr>
               <td style="padding:14px;font-weight:bold;color:#666;vertical-align:top;">Details</td>
-              <td style="padding:14px;">${details || 'None provided'}</td>
+              <td style="padding:14px;">${details || "None provided"}</td>
             </tr>
           </table>
           <p style="margin-top:24px;color:#999;font-size:13px;">Submitted from A&E Vineyard Development website</p>
@@ -58,12 +60,15 @@ export default async function handler(req, res) {
     });
 
     if (response.ok) {
-      return res.status(200).json({ success: true });
+      return NextResponse.json({ success: true });
     } else {
       const error = await response.json();
-      return res.status(500).json({ error: error.message });
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
-  } catch (err) {
-    return res.status(500).json({ error: 'Failed to send email' });
+  } catch {
+    return NextResponse.json(
+      { error: "Failed to send email" },
+      { status: 500 }
+    );
   }
 }
